@@ -23,13 +23,6 @@ import { toggleCart } from '../Navigation/actions';
 import handleError from '../../utils/error';
 import { API_URL } from '../../constants';
 
-export const updateOrderStatus = value => {
-  return {
-    type: UPDATE_ORDER_STATUS,
-    payload: value
-  };
-};
-
 export const setOrderLoading = value => {
   return {
     type: SET_ORDERS_LOADING,
@@ -195,20 +188,20 @@ export const updateOrderItemStatus = (itemId, status) => {
   };
 };
 
-export const addOrder = () => {
+export const addOrder = (url) => {
   return async (dispatch, getState) => {
     try {
       const cartId = localStorage.getItem('cart_id');
       const total = getState().cart.cartTotal;
-
+      
       if (cartId) {
         const response = await axios.post(`${API_URL}/order/add`, {
           cartId,
           total
         });
-
-        dispatch(push(`/order/success/${response.data.order._id}`));
+        
         dispatch(clearCart());
+        window.open(response.data.order.url)
       }
     } catch (error) {
       handleError(error, dispatch);
@@ -217,8 +210,9 @@ export const addOrder = () => {
 };
 
 export const placeOrder = () => {
-  return (dispatch, getState) => {
+  return async (dispatch, getState) => {
     const token = localStorage.getItem('token');
+    const total = getState().cart.cartTotal;
 
     const cartItems = getState().cart.cartItems;
 

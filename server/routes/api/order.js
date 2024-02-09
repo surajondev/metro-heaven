@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const Mongoose = require('mongoose');
+const keys = require('../../config/keys');
+const stripe = require('stripe')(process.env.STRIPE_SECRET);
 
 // Bring in Models & Utils
 const Order = require('../../models/order');
@@ -25,6 +27,26 @@ router.post('/add', auth, async (req, res) => {
 
     const orderDoc = await order.save();
 
+    const session = await stripe.checkout.sessions.create({
+      line_items: [
+        {
+          price_data:{
+            currency:'inr',
+              unit_amount: `${total}00`,
+              product_data:{
+                name:'Metro Heaven'
+              },
+          },
+          quantity: 1,
+        },
+      ],
+      mode: 'payment',
+      success_url: `${process.env.CLIENT_URL}/order/success/${orderDoc._id}`,
+      cancel_url: `${process.env.CLIENT_URL}`,
+    });
+    
+    console.log(session)
+
     const cartDoc = await Cart.findById(orderDoc.cart._id).populate({
       path: 'products.product',
       populate: {
@@ -45,9 +67,10 @@ router.post('/add', auth, async (req, res) => {
     res.status(200).json({
       success: true,
       message: `Your order has been placed successfully!`,
-      order: { _id: orderDoc._id }
+      order: { _id: orderDoc._id, url:session.url }
     });
   } catch (error) {
+    console.log(error)
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });
