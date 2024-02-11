@@ -123,24 +123,16 @@ export const fetchMerchants = (n, v) => {
     try {
       dispatch(setMerchantLoading(true));
 
-      const response = await axios.get(`${API_URL}/merchant`, {
-        params: {
-          page: v ?? 1,
-          limit: 20
-        }
-      });
+      const response = await axios.get(`${API_URL}/order/`);
 
-      const { merchants, totalPages, currentPage, count } = response.data;
+      console.log(response);
 
       dispatch({
         type: FETCH_MERCHANTS,
-        payload: merchants
+        payload: response.data.orders
       });
 
-      dispatch({
-        type: SET_ADVANCED_FILTERS,
-        payload: { totalPages, currentPage, count }
-      });
+      return response.data.orders;
     } catch (error) {
       handleError(error, dispatch);
     } finally {

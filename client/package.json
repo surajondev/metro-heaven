@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@fontsource/poppins": "^4.5.9",
+    "apexcharts": "^3.45.2",
     "autosuggest-highlight": "^3.1.1",
     "axios": "^0.21.1",
     "bootstrap": "^4.3.1",
@@ -24,6 +25,7 @@
     "mobile-detect": "^1.4.4",
     "rc-slider": "^9.7.2",
     "react": "^16.8.6",
+    "react-apexcharts": "^1.4.1",
     "react-autosuggest": "^10.1.0",
     "react-bootstrap-table-next": "^3.1.5",
     "react-bootstrap-table2-toolkit": "^2.0.1",

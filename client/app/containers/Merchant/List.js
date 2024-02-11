@@ -18,18 +18,46 @@ import SearchResultMeta from '../../components/Manager/SearchResultMeta';
 import LoadingIndicator from '../../components/Common/LoadingIndicator';
 import NotFound from '../../components/Common/NotFound';
 import Pagination from '../../components/Common/Pagination';
+import Chart from 'react-apexcharts';
+import { FETCH_MERCHANTS } from './constants';
 
 class List extends React.PureComponent {
   constructor(props) {
     super(props);
 
     this.state = {
-      search: ''
+      search: '',
+      data: '',
+      label: ''
     };
   }
 
+  handleFetchdData = async () => {
+    const response = await this.props.fetchMerchants();
+    console.log('data', response);
+    let labelArray = [];
+    let dataArray = [];
+    response.map(item => {
+      item.products.map(pItem => {
+        if (labelArray.includes(pItem.product.sku)) {
+          let index = labelArray.findIndex(x => x == pItem.product.sku);
+          let newValue = dataArray[index] + pItem.quantity;
+          dataArray[index] = newValue;
+        } else {
+          labelArray.push(pItem.product.sku);
+          dataArray.push(pItem.quantity);
+        }
+      });
+    });
+    console.log(labelArray, dataArray);
+    this.setState({
+      data: dataArray,
+      label: labelArray
+    });
+  };
+
   componentDidMount() {
-    this.props.fetchMerchants();
+    this.handleFetchdData();
   }
 
   handleMerchantSearch = e => {
@@ -71,51 +99,37 @@ class List extends React.PureComponent {
     const displayPagination = advancedFilters.totalPages > 1;
     const displayMerchants = filteredMerchants && filteredMerchants.length > 0;
 
+    const options = {
+      chart: {
+        type: 'bar',
+        stacked: false,
+        toolbar: {
+          show: true
+        }
+      },
+
+      xaxis: {
+        labels: {
+          trim: true
+        },
+        categories: this.state.label
+      }
+    };
+
+    console.log(this.state.data);
+    const series = [
+      {
+        name: 'sales',
+        data: this.state.data
+      }
+    ];
+
     return (
       <div className='merchant-dashboard'>
-        <SubPage
-          title={'Merchants'}
-          actionTitle={user.role === ROLES.Admin && 'Add'}
-          handleAction={() => history.push('/dashboard/merchant/add')}
-        />
-        <MerchantSearch
-          onSearch={this.handleMerchantSearch}
-          onSearchSubmit={searchMerchants}
-        />
+        <SubPage title={'Stats'} />
         {isLoading && <LoadingIndicator />}
-        {displayMerchants && (
-          <>
-            {!isSearch && displayPagination && (
-              <Pagination
-                totalPages={advancedFilters.totalPages}
-                onPagination={fetchMerchants}
-              />
-            )}
-            <SearchResultMeta
-              label='merchants'
-              count={
-                isSearch ? filteredMerchants.length : advancedFilters.count
-              }
-            />
-            <MerchantList
-              merchants={filteredMerchants}
-              approveMerchant={m =>
-                approveMerchant(m, search, advancedFilters.currentPage)
-              }
-              rejectMerchant={m =>
-                rejectMerchant(m, search, advancedFilters.currentPage)
-              }
-              deleteMerchant={m =>
-                deleteMerchant(m, search, advancedFilters.currentPage)
-              }
-              disableMerchant={(m, v) =>
-                disableMerchant(m, v, search, advancedFilters.currentPage)
-              }
-            />
-          </>
-        )}
-        {!isLoading && !displayMerchants && (
-          <NotFound message='No merchants found.' />
+        {this.state.data && (
+          <Chart type='bar' series={series} options={options} />
         )}
       </div>
     );

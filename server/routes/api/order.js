@@ -13,6 +13,23 @@ const mailgun = require('../../services/mailgun');
 const store = require('../../utils/store');
 const { ROLES, CART_ITEM_STATUS } = require('../../constants');
 
+router.get('/stats', auth, async (req, res) => {
+  try {
+    const collection = db.collection('orders');
+
+    const documents = await collection.find({}).toArray();
+
+    res.status(200).json({
+      documents
+    });
+  } catch (error) {
+    console.log(error);
+    res.status(400).json({
+      error: 'Your request could not be processed. Please try again.'
+    });
+  }
+});
+
 router.post('/add', auth, async (req, res) => {
   try {
     const cart = req.body.cartId;
@@ -30,22 +47,22 @@ router.post('/add', auth, async (req, res) => {
     const session = await stripe.checkout.sessions.create({
       line_items: [
         {
-          price_data:{
-            currency:'inr',
-              unit_amount: `${total}00`,
-              product_data:{
-                name:'Metro Heaven'
-              },
+          price_data: {
+            currency: 'inr',
+            unit_amount: `${total}00`,
+            product_data: {
+              name: 'Metro Heaven'
+            }
           },
-          quantity: 1,
-        },
+          quantity: 1
+        }
       ],
       mode: 'payment',
       success_url: `${process.env.CLIENT_URL}/order/success/${orderDoc._id}`,
-      cancel_url: `${process.env.CLIENT_URL}`,
+      cancel_url: `${process.env.CLIENT_URL}`
     });
-    
-    console.log(session)
+
+    console.log(session);
 
     const cartDoc = await Cart.findById(orderDoc.cart._id).populate({
       path: 'products.product',
@@ -67,10 +84,10 @@ router.post('/add', auth, async (req, res) => {
     res.status(200).json({
       success: true,
       message: `Your order has been placed successfully!`,
-      order: { _id: orderDoc._id, url:session.url }
+      order: { _id: orderDoc._id, url: session.url }
     });
   } catch (error) {
-    console.log(error)
+    console.log(error);
     res.status(400).json({
       error: 'Your request could not be processed. Please try again.'
     });

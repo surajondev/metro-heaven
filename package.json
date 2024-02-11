@@ -1,17 +1,13 @@
 {
-  "name": "mern-ecommerce",
+  "name": "metro-haven",
   "version": "1.0.0",
-  "description": "MERN Ecommerce",
+  "description": "metro-haven",
   "main": "server/index.js",
   "scripts": {
     "dev": "npm-run-all --parallel dev:*",
     "dev:client": "cd client && npm run dev",
     "dev:server": "cd server && npm run dev",
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/mohamedsamara/mern-ecommerce.git"
   },
   "keywords": [
     "node",
@@ -22,12 +18,9 @@
     "redux-thunk",
     "webpack"
   ],
-  "author": "Mohamed Samara (https://github.com/mohamedsamara)",
+  "author": "Suraj Vishwakarma, Sai Ganesh, Sunnayam, Talha",
   "license": "MIT",
-  "bugs": {
-    "url": "https://github.com/mohamedsamara/mern-ecommerce/issues"
-  },
-  "homepage": "https://github.com/mohamedsamara/mern-ecommerce#readme",
+  "homepage": "https://metro-heaven.vercel.app/",
   "devDependencies": {
     "cross-env": "^5.2.1",
     "npm-run-all": "^4.1.5"
